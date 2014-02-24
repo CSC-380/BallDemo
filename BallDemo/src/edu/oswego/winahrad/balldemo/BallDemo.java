@@ -1,6 +1,8 @@
 package edu.oswego.winahrad.balldemo;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Peripheral;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -13,6 +15,8 @@ public class BallDemo extends Game {
     int width = 480;
     int height = 320;
 
+    boolean useDpad = false;
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -21,6 +25,8 @@ public class BallDemo extends Game {
         setScreen(new StartScreen(this));
 
         shapeRenderer = new ShapeRenderer();
+
+        useDpad = !Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer);
    }
 
     @Override

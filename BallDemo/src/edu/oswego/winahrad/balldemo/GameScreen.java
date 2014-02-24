@@ -1,7 +1,9 @@
 package edu.oswego.winahrad.balldemo;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Input.Peripheral;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -44,16 +46,15 @@ public class GameScreen implements Screen {
     TiledMap map;
     OrthogonalTiledMapRenderer mapRenderer;
 
+    float tiltX;
+    float tiltY;
+
     public GameScreen(final BallDemo game) {
         this.game = game;
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, game.width, game.height);
 
-
-        // FIXME: how can i have this just load for both a desktop and android?
-        //        for desktop i need to path it to the android folder,
-        //        do i just need copies for each?
         map = new TmxMapLoader().load("data/balldemo.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
         mapRenderer.setView(camera);
@@ -94,7 +95,7 @@ public class GameScreen implements Screen {
         // Create a fixture definition to apply our shape to
         FixtureDef ballFixtureDef = new FixtureDef();
         ballFixtureDef.shape = circle;
-        ballFixtureDef.density = .5f;
+        ballFixtureDef.density = 0.5f;
         ballFixtureDef.friction = 0.4f;
         ballFixtureDef.restitution = 0.6f; // Make it bounce a little bit
 
@@ -104,16 +105,83 @@ public class GameScreen implements Screen {
         // dispose after creating fixture
         circle.dispose();
 
+        if (game.useDpad) {
+            Gdx.input.setInputProcessor(new InputProcessor() {
+                @Override
+                public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public boolean touchDragged(int screenX, int screenY, int pointer) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public boolean scrolled(int amount) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public boolean mouseMoved(int screenX, int screenY) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public boolean keyUp(int keycode) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public boolean keyTyped(char character) {
+                    // TODO Auto-generated method stub
+                    return false;
+                }
+
+                @Override
+                public boolean keyDown(int keycode) {
+                    switch (keycode) {
+                    case Keys.LEFT:
+                        tiltX -= 10f;
+                        break;
+                    case Keys.RIGHT:
+                        tiltX += 10f;
+                        break;
+                    case Keys.UP:
+                        tiltY += 10f;
+                        break;
+                    case Keys.DOWN:
+                        tiltY -= 10f;
+                        break;
+                    case Keys.CENTER:
+                        tiltX = 0f;
+                        tiltY = 0f;
+                        break;
+
+                    default:
+                        break;
+                    }
+                    Gdx.app.log("keydown", tiltX + " " + tiltY);
+                    return false;
+                }
+            });
+        }
         startTime = TimeUtils.nanoTime();
     }
 
     @Override
     public void render(float delta) {
-        // TODO: get the values for pitch and roll up on the screen.
-        //       i need to be able to see them to see how they should affect things.
-        //       can we make use of yaw as well?
-
-
 
         // clear the screen
         Gdx.gl.glClearColor(0, 0, 0.2f, 1);
@@ -129,9 +197,9 @@ public class GameScreen implements Screen {
 
         game.batch.begin();
         game.font.draw(game.batch, "FPS: " + fps, 10, 15);
+        game.font.draw(game.batch, "X: " + tiltX, 10, 30);
+        game.font.draw(game.batch, "Y: " + tiltY, 10, 45);
         if (Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer)) {
-            game.font.draw(game.batch, "X: " + Gdx.input.getAccelerometerX(), 10, 30);
-            game.font.draw(game.batch, "Y: " + Gdx.input.getAccelerometerY(), 10, 45);
             game.font.draw(game.batch, "Z: " + Gdx.input.getAccelerometerZ(), 10, 60);
         }
         game.batch.end();
@@ -147,15 +215,20 @@ public class GameScreen implements Screen {
             startTime = TimeUtils.nanoTime();
         }
 
-        if (Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer)) {
-            ballBody.applyLinearImpulse(
-                // accelerometer is reversed from screen coordinates
-                Gdx.input.getAccelerometerY() * 10,
-                Gdx.input.getAccelerometerX() * -10,
+        if (!game.useDpad) {
+            if (Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer)) {
+                // accelerometer is reversed from screen coordinates, we are in landscape mode
+                tiltX = Gdx.input.getAccelerometerY() * 10;
+                tiltY = Gdx.input.getAccelerometerX() * -10;
+            }
+        }
+
+        ballBody.applyLinearImpulse(
+                tiltX,
+                tiltY,
                 ballBody.getPosition().x,
                 ballBody.getPosition().y,
                 false);
-        }
         world.step(1/60f, 6, 2);
     }
 
