@@ -1,5 +1,7 @@
 package edu.oswego.winahrad.balldemo;
 
+import java.text.DecimalFormat;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Input.Peripheral;
@@ -7,23 +9,16 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.EllipseMapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
 
@@ -31,15 +26,11 @@ public class GameScreen implements Screen {
     final BallDemo game;
     final OrthographicCamera camera;
 
-    final Circle ball;
+    Ball ball;
 
     World world = new World(new Vector2(0, 0), true);
+    ContactListener contactListener;
 
-    BodyDef ballBodyDef;
-    CircleShape circle;
-    FixtureDef ballFixtureDef;
-    Fixture fixture;
-    Body ballBody;
     int fps = 0;
     long startTime;
 
@@ -49,8 +40,15 @@ public class GameScreen implements Screen {
     float tiltX;
     float tiltY;
 
+    Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
+    final DecimalFormat decimalFormatter = new DecimalFormat("######.##");
+
     public GameScreen(final BallDemo game) {
         this.game = game;
+
+        debugRenderer.setDrawVelocities(true);
+        debugRenderer.setDrawContacts(true);
+        debugRenderer.setDrawJoints(true);
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, game.width, game.height);
@@ -59,51 +57,34 @@ public class GameScreen implements Screen {
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
         mapRenderer.setView(camera);
 
-        MapLayer layer = map.getLayers().get(1);
+        for (MapLayer l : map.getLayers()) {
+            Gdx.app.log("map layer", l.getName());
+        }
+        MapLayer layer = map.getLayers().get("collision");
         for (MapObject obj : layer.getObjects()) {
             // NOTE: when creating the map objects the polygons must have no more
             //       than 8 vertices and must not be concave. this is a limitation
             //       of the physics engine. so complex shapes need to be composed
             //       of multiple adjacent polygons.
-            if (obj instanceof PolygonMapObject) {
-                PolygonMapObject pobj = (PolygonMapObject)obj;
-                Polygon polygon = pobj.getPolygon();
-
-                BodyDef bdef = new BodyDef();
-                bdef.position.set(polygon.getX(), polygon.getY());
-                Body body = world.createBody(bdef);
-                PolygonShape shape = new PolygonShape();
-                shape.set(polygon.getVertices());
-                body.createFixture(shape, 0.0f);
-                // dispose after creating fixture
-                shape.dispose();
+            if (obj.getName().equals("wall")) {
+                if (obj instanceof PolygonMapObject) {
+                    Gdx.app.log("populating map", "adding wall");
+                    new Wall((PolygonMapObject)obj, world);
+                }
+            }
+            else if (obj.getName().equals("bumper")) {
+                if (obj instanceof PolygonMapObject) {
+                    Gdx.app.log("populating map", "adding bumper");
+                    new PushBumper((PolygonMapObject)obj, world);
+                }
+            }
+            else if (obj.getName().equals("ball spawn point")) {
+                if (obj instanceof EllipseMapObject) {
+                    Gdx.app.log("populating map", "adding ball");
+                    ball = new Ball((EllipseMapObject)obj, world);
+                }
             }
         }
-
-        ball = new Circle((game.width/2), (game.height/2), 10);
-
-        ballBodyDef = new BodyDef();
-        ballBodyDef.type = BodyType.DynamicBody;
-        ballBodyDef.position.set(game.width/2, game.height/2);
-
-        ballBody = world.createBody(ballBodyDef);
-        ballBody.setUserData(ball);
-
-        circle = new CircleShape();
-        circle.setRadius(10f);
-
-        // Create a fixture definition to apply our shape to
-        FixtureDef ballFixtureDef = new FixtureDef();
-        ballFixtureDef.shape = circle;
-        ballFixtureDef.density = 0.5f;
-        ballFixtureDef.friction = 0.4f;
-        ballFixtureDef.restitution = 0.6f; // Make it bounce a little bit
-
-        // Create our fixture and attach it to the body
-        fixture = ballBody.createFixture(ballFixtureDef);
-
-        // dispose after creating fixture
-        circle.dispose();
 
         if (game.useDpad) {
             Gdx.input.setInputProcessor(new InputProcessor() {
@@ -177,6 +158,8 @@ public class GameScreen implements Screen {
                 }
             });
         }
+        contactListener = new GameContactListener();
+        world.setContactListener(contactListener);
         startTime = TimeUtils.nanoTime();
     }
 
@@ -190,24 +173,28 @@ public class GameScreen implements Screen {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
-        mapRenderer.render();
+        if (game.debugView) {
+            debugRenderer.render(world, camera.combined);
+        }
+        else {
+            mapRenderer.render();
+        }
 
-        ball.setX(ballBody.getPosition().x);
-        ball.setY(ballBody.getPosition().y);
 
         game.batch.begin();
-        game.font.draw(game.batch, "FPS: " + fps, 10, 15);
-        game.font.draw(game.batch, "X: " + tiltX, 10, 30);
-        game.font.draw(game.batch, "Y: " + tiltY, 10, 45);
-        if (Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer)) {
-            game.font.draw(game.batch, "Z: " + Gdx.input.getAccelerometerZ(), 10, 60);
+        if (game.debugView) {
+            game.font.draw(game.batch, "FPS: " + fps, 10, 15);
+            game.font.draw(game.batch, "X: " + decimalFormatter.format(tiltX), 10, 30);
+            game.font.draw(game.batch, "Y: " + decimalFormatter.format(tiltY), 10, 45);
+            game.font.draw(game.batch, "BVel X: " + decimalFormatter.format(ball.getBody().getLinearVelocity().x), 10, 60);
+            game.font.draw(game.batch, "BVel Y: " + decimalFormatter.format(ball.getBody().getLinearVelocity().y), 10, 75);
+            game.font.draw(game.batch, "BVel A: " + decimalFormatter.format(ball.getBody().getAngularVelocity()), 10, 90);
+        }
+        else {
+            ball.render(game.batch);
         }
         game.batch.end();
 
-        game.shapeRenderer.begin(ShapeType.Filled);
-        game.shapeRenderer.setColor(0, 1, 0, 1);
-        game.shapeRenderer.circle(ball.x, ball.y, ball.radius);
-        game.shapeRenderer.end();
 
         // update every second
         if (TimeUtils.nanoTime() - startTime > 1000000000)  {
@@ -223,13 +210,10 @@ public class GameScreen implements Screen {
             }
         }
 
-        ballBody.applyLinearImpulse(
-                tiltX,
-                tiltY,
-                ballBody.getPosition().x,
-                ballBody.getPosition().y,
-                false);
-        world.step(1/60f, 6, 2);
+        ball.applyLinearImpulse(tiltX, tiltY);
+
+        //world.step(1/60f, 6, 2);
+        world.step(1/45f, 10, 8);
     }
 
     @Override

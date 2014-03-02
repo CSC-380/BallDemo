@@ -79,7 +79,7 @@ public class StartScreen implements Screen {
         table.row();
 
         final CheckBox useDpad = new CheckBox("Use DPad: " + (game.useDpad ? "X" : " ") , checkBoxStyle);
-        table.add(useDpad);
+        table.add(useDpad).spaceTop(20);
 
         useDpad.setChecked(game.useDpad);
         useDpad.addListener(new ChangeListener() {
@@ -87,6 +87,20 @@ public class StartScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 game.useDpad = useDpad.isChecked();
                 useDpad.setText("Use DPad: " + (game.useDpad ? "X" : " "));
+            }
+        });
+
+        table.row();
+
+        final CheckBox debugView = new CheckBox("Debug View: " + (game.debugView ? "X" : " ") , checkBoxStyle);
+        table.add(debugView).spaceTop(10);
+
+        debugView.setChecked(game.debugView);
+        debugView.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.debugView = debugView.isChecked();
+                debugView.setText("Debug View: " + (game.debugView ? "X" : " "));
             }
         });
     }

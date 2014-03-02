@@ -3,68 +3,71 @@
  <tileset firstgid="1" name="balldemo" tilewidth="16" tileheight="16" spacing="2">
   <image source="textures/packed/balldemo.png" width="256" height="32"/>
  </tileset>
- <layer name="Tile Layer 1" width="30" height="20">
+ <layer name="background" width="30" height="20">
   <data encoding="base64" compression="zlib">
    eJztlN0KgCAMhZf9mdb7v26THNhYoGULpIuDIOLndo6zALAqa0LNqEFZy88FgxpRXYX7zcU9Endj6xN5lMvk+livdL5Ff1vg8oxSzmpyLRxzKN3jGd2ianKnyNbmSj12N7jh7TTDS/2kf2jg/CdzuLS/FHB9wpVmQA431NkLnj3JtXvJ37TPvO6UXZvL+3zV8y/nFfmoqZCZHZaCC9g=
   </data>
  </layer>
- <objectgroup name="Object Layer 1" width="30" height="20">
-  <object name="small_diamond" x="385" y="72">
+ <objectgroup name="collision" width="30" height="20">
+  <object name="wall" x="385" y="72">
    <polygon points="0,0 -9,9 -1,18 9,9"/>
   </object>
-  <object name="large_diamond" x="304" y="161">
+  <object name="wall" x="304" y="161">
    <polygon points="0,0 -15,16 1,32 16,16"/>
   </object>
-  <object name="small_octogon" x="80" y="73">
+  <object name="bumper" x="80" y="73">
    <polygon points="0,0 -8,8 -8,25 0,32 17,32 25,24 25,7 17,0"/>
   </object>
-  <object name="large_octogon" x="111" y="210">
+  <object name="wall" x="111" y="210">
    <polygon points="0,0 -14,14 -14,32 0,46 18,46 32,32 32,13 18,0"/>
   </object>
-  <object x="384" y="152">
+  <object name="wall" x="384" y="152">
    <polygon points="0,0 -8,8 -8,42 0,66 17,66 25,58 24,7 18,1"/>
   </object>
-  <object x="450" y="151">
+  <object name="wall" x="450" y="151">
    <polygon points="-1,1 -10,9 -10,91 -1,114 6,108 7,9"/>
   </object>
-  <object x="313" y="225">
+  <object name="wall" x="313" y="225">
    <polygon points="0,0 7,-8 42,-7 56,9 6,8"/>
   </object>
-  <object x="376" y="195">
+  <object name="wall" x="376" y="195">
    <polygon points="0,0 -22,24 -7,40 8,23"/>
   </object>
-  <object x="313" y="274">
+  <object name="wall" x="313" y="274">
    <polygon points="0,0 8,8 107,8 119,-8 7,-8"/>
   </object>
-  <object x="403" y="264">
+  <object name="wall" x="403" y="264">
    <polygon points="0,0 46,1 33,-15 13,-14"/>
   </object>
-  <object x="441" y="243">
+  <object name="wall" x="441" y="243">
    <polygon points="0,0 -6,7 8,21"/>
   </object>
-  <object x="479" y="0">
+  <object name="wall" x="479" y="0">
    <polygon points="0,0 -16,0 0,16"/>
   </object>
-  <object x="16" y="1">
+  <object name="wall" x="16" y="1">
    <polygon points="0,0 -15,16 -16,0"/>
   </object>
-  <object x="0" y="304">
+  <object name="wall" x="0" y="304">
    <polygon points="0,0 15,15 0,15"/>
   </object>
-  <object x="479" y="306">
+  <object name="wall" x="479" y="306">
    <polygon points="0,0 -13,14 0,13"/>
   </object>
-  <object x="16" y="1">
+  <object name="wall" x="16" y="1">
    <polygon points="0,0 449,0 448,1 0,0"/>
   </object>
-  <object x="0" y="16">
+  <object name="wall" x="0" y="16">
    <polygon points="0,0 2,1 2,289 1,288"/>
   </object>
-  <object x="16" y="320">
+  <object name="wall" x="16" y="320">
    <polygon points="0,0 0,-2 449,-1 448,0"/>
   </object>
-  <object x="477" y="15">
+  <object name="wall" x="477" y="15">
    <polygon points="0,0 1,291 1,291 1,0"/>
+  </object>
+  <object name="ball spawn point" x="174" y="101" width="5" height="5">
+   <ellipse/>
   </object>
  </objectgroup>
 </map>
