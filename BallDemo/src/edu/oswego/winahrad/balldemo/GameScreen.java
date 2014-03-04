@@ -44,6 +44,10 @@ public class GameScreen implements Screen {
     final DecimalFormat decimalFormatter = new DecimalFormat("######.##");
 
     public GameScreen(final BallDemo game) {
+        // TODO: apparently we can scale the graphics and the world to make things
+        //       appear to be moving around much faster. this could possibly make
+        //       the game feel a bit more responsive.
+
         this.game = game;
 
         debugRenderer.setDrawVelocities(true);

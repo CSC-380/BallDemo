@@ -55,6 +55,7 @@ public class PushBumper {
             //       be better. if we use the center of this object and the
             //       outside point of contact to create a direction vector. we
             //       could then use that to more accurately apply the force.
+            //       not sure about the math to determine how much force to apply.
             float force = 1000000.0f;
             target.applyLinearImpulse(
                 force * target.getLinearVelocity().x,

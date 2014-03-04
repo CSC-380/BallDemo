@@ -22,9 +22,9 @@ public class Ball {
         texture = new Texture(Gdx.files.internal("data/GreenOrb.png"));
         sprite = new Sprite(texture);
 
-        // dont know why scale needs to be 2...
-        // maybe i need to tweak the texture size or something...
-        sprite.setScale(2);
+        // TODO: sprites come up 2x as large as they should be.
+        //       there must be some sort of scaling going somewhere else
+        sprite.setScale(0.3125f);
 
         sprite.setOrigin(sprite.getWidth() / 2f, sprite.getHeight() / 2f);
 
