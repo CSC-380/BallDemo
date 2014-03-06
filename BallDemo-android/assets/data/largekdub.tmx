@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="100" height="20" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="sci-fi-platformer-tiles-32x32-extension_0" tilewidth="32" tileheight="32">
+  <image source="sci-fi-platformer-tiles-32x32-extension_0.png" width="512" height="4096"/>
+ </tileset>
+ <layer name="background" width="100" height="20">
+  <data encoding="base64" compression="zlib">
+   eJztwwENAAAMw6CKmn9tF3JIWDVVVVVVVVVVff4AZ/CWUA==
+  </data>
+ </layer>
+ <layer name="map" width="100" height="20">
+  <data encoding="base64" compression="zlib">
+   eJztmEEOgjAQRSexnEY3rHXLHbyD3kDPxxW8jiWpC5sO/nZqM4v/kr8olJL8FwphnkRmxlWOB5El5hRDyny62jvf6x6bi2tyQsqM9HFOLi70oZL70MYt0dYkOtbukLn00Q59+KJlL9KuzY+TepDu6GMc9OGLve+rXmsSHPrwRak79D2OjgkOffgC3Z/oYwwtPtA1yTc1/5p+dUgfdhAf+Vzk2lJuQWSNuQf66IG1w83FKzmhDzvWDh/JxTPUP1vM//MG7ZFYKQ==
+  </data>
+ </layer>
+ <objectgroup name="collision" width="100" height="20">
+  <object name="ball finish point" x="34" y="34" width="90" height="90">
+   <ellipse/>
+  </object>
+  <object name="ball spawn point" x="3074" y="514" width="90" height="90">
+   <ellipse/>
+  </object>
+  <object name="wall" x="0" y="2" width="3197" height="27"/>
+  <object name="wall" x="3169" y="1" width="29" height="636"/>
+  <object name="wall" x="2" y="1" width="28" height="637"/>
+  <object name="wall" x="1" y="610" width="3196" height="27"/>
+  <object name="wall" x="2977" y="192" width="125" height="93"/>
+  <object name="wall" x="3040" y="352" width="63" height="95"/>
+  <object name="wall" x="2912" y="353" width="62" height="92"/>
+  <object name="wall" x="2688" y="512" width="383" height="30"/>
+  <object name="wall" x="2624" y="30" width="30" height="97"/>
+  <object name="wall" x="2655" y="96" width="450" height="30"/>
+  <object name="wall" x="2880" y="117" width="31" height="168"/>
+  <object name="wall" x="2816" y="353" width="30" height="158"/>
+  <object name="wall" x="2624" y="287" width="95" height="63"/>
+  <object name="wall" x="2656" y="351" width="96" height="64"/>
+  <object name="wall" x="2367" y="28" width="64" height="130"/>
+  <object name="wall" x="2207" y="479" width="225" height="62"/>
+  <object name="wall" x="2496" y="97" width="62" height="413"/>
+  <object name="wall" x="2560" y="417" width="31" height="192"/>
+  <object name="wall" x="2590" y="480" width="33" height="132"/>
+  <object name="wall" x="2559" y="190" width="257" height="33"/>
+  <object name="wall" x="2784" y="219" width="32" height="67"/>
+ </objectgroup>
+</map>

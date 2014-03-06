@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.objects.EllipseMapObject;
+import com.badlogic.gdx.math.Ellipse;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -19,18 +20,17 @@ public class Ball {
 
     public Ball(EllipseMapObject mapObject, World world) {
         // http://opengameart.org/content/orbs-wo-drop-shadows
+        Ellipse ellipse = mapObject.getEllipse();
         texture = new Texture(Gdx.files.internal("data/GreenOrb.png"));
         sprite = new Sprite(texture);
 
         // TODO: sprites come up 2x as large as they should be.
         //       there must be some sort of scaling going somewhere else
-        sprite.setScale(0.3125f);
-
-        sprite.setOrigin(sprite.getWidth() / 2f, sprite.getHeight() / 2f);
+        sprite.setScale(0.5f);
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyType.DynamicBody;
-        bodyDef.position.set(mapObject.getEllipse().x, mapObject.getEllipse().y);
+        bodyDef.position.set(ellipse.x + (ellipse.width * 0.5f), ellipse.y + (ellipse.height * 0.5f));
         bodyDef.angularDamping = 0.1f;
         bodyDef.linearDamping = 0.1f;
         //bodyDef.fixedRotation = true;
@@ -39,7 +39,7 @@ public class Ball {
         body.setUserData(this);
 
         CircleShape shape = new CircleShape();
-        shape.setRadius(10f);
+        shape.setRadius(16f);
 
         // Create a fixture definition to apply our shape to
         FixtureDef fixtureDef = new FixtureDef();
@@ -67,10 +67,16 @@ public class Ball {
     }
 
     public void render(SpriteBatch batch) {
-        sprite.setPosition(
-            body.getPosition().x - (sprite.getWidth() / 2f),
-            body.getPosition().y - (sprite.getHeight() / 2f));
+        sprite.setPosition(getX(), getY());
         sprite.draw(batch);
+    }
+
+    public float getX() {
+        return body.getPosition().x - (sprite.getWidth() * 0.5f);
+    }
+
+    public float getY() {
+        return body.getPosition().y - (sprite.getHeight() * 0.5f);
     }
 
     public void dispose() {

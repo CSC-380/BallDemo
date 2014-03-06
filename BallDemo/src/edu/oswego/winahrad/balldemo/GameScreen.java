@@ -13,6 +13,7 @@ import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.EllipseMapObject;
 import com.badlogic.gdx.maps.objects.PolygonMapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -57,13 +58,10 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, game.width, game.height);
 
-        map = new TmxMapLoader().load("data/balldemo.tmx");
+        map = new TmxMapLoader().load("data/largekdub.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1);
         mapRenderer.setView(camera);
 
-        for (MapLayer l : map.getLayers()) {
-            Gdx.app.log("map layer", l.getName());
-        }
         MapLayer layer = map.getLayers().get("collision");
         for (MapObject obj : layer.getObjects()) {
             // NOTE: when creating the map objects the polygons must have no more
@@ -74,6 +72,10 @@ public class GameScreen implements Screen {
                 if (obj instanceof PolygonMapObject) {
                     Gdx.app.log("populating map", "adding wall");
                     new Wall((PolygonMapObject)obj, world);
+                }
+                else if (obj instanceof RectangleMapObject) {
+                    Gdx.app.log("populating map", "adding wall");
+                    new Wall((RectangleMapObject)obj, world);
                 }
             }
             else if (obj.getName().equals("bumper")) {
@@ -169,11 +171,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-
         // clear the screen
         Gdx.gl.glClearColor(0, 0, 0.2f, 1);
         Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
+        camera.position.set(ball.getBody().getPosition().x, ball.getBody().getPosition().y, camera.position.z);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
@@ -181,18 +183,18 @@ public class GameScreen implements Screen {
             debugRenderer.render(world, camera.combined);
         }
         else {
+            mapRenderer.setView(camera);
             mapRenderer.render();
         }
 
-
         game.batch.begin();
         if (game.debugView) {
-            game.font.draw(game.batch, "FPS: " + fps, 10, 15);
-            game.font.draw(game.batch, "X: " + decimalFormatter.format(tiltX), 10, 30);
-            game.font.draw(game.batch, "Y: " + decimalFormatter.format(tiltY), 10, 45);
-            game.font.draw(game.batch, "BVel X: " + decimalFormatter.format(ball.getBody().getLinearVelocity().x), 10, 60);
-            game.font.draw(game.batch, "BVel Y: " + decimalFormatter.format(ball.getBody().getLinearVelocity().y), 10, 75);
-            game.font.draw(game.batch, "BVel A: " + decimalFormatter.format(ball.getBody().getAngularVelocity()), 10, 90);
+            renderTextInCameraView("FPS: " + fps, 10, 15);
+            renderTextInCameraView("X: " + decimalFormatter.format(tiltX), 10, 30);
+            renderTextInCameraView("Y: " + decimalFormatter.format(tiltY), 10, 45);
+            renderTextInCameraView("BVel X: " + decimalFormatter.format(ball.getBody().getLinearVelocity().x), 10, 60);
+            renderTextInCameraView("BVel Y: " + decimalFormatter.format(ball.getBody().getLinearVelocity().y), 10, 75);
+            renderTextInCameraView("BVel A: " + decimalFormatter.format(ball.getBody().getAngularVelocity()), 10, 90);
         }
         else {
             ball.render(game.batch);
@@ -218,6 +220,13 @@ public class GameScreen implements Screen {
 
         //world.step(1/60f, 6, 2);
         world.step(1/45f, 10, 8);
+    }
+
+    private void renderTextInCameraView(String text, float x, float y) {
+        game.font.draw(game.batch, text,
+            camera.position.x - (camera.viewportWidth / 2f) + x,
+            camera.position.y - (camera.viewportHeight / 2f) + y
+        );
     }
 
     @Override
