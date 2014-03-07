@@ -18,7 +18,11 @@ public class Ball {
     private final Sprite sprite;
     private final Body body;
 
-    public Ball(EllipseMapObject mapObject, World world) {
+    ScaleConverter scale;
+
+    public Ball(EllipseMapObject mapObject, World world, ScaleConverter scale) {
+        this.scale = scale;
+
         // http://opengameart.org/content/orbs-wo-drop-shadows
         Ellipse ellipse = mapObject.getEllipse();
         texture = new Texture(Gdx.files.internal("data/GreenOrb.png"));
@@ -30,7 +34,9 @@ public class Ball {
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyType.DynamicBody;
-        bodyDef.position.set(ellipse.x + (ellipse.width * 0.5f), ellipse.y + (ellipse.height * 0.5f));
+        bodyDef.position.set(
+                scale.pixelsToMeters(ellipse.x + (ellipse.width * 0.5f)),
+                scale.pixelsToMeters(ellipse.y + (ellipse.height * 0.5f)));
         bodyDef.angularDamping = 0.1f;
         bodyDef.linearDamping = 0.1f;
         //bodyDef.fixedRotation = true;
@@ -39,7 +45,7 @@ public class Ball {
         body.setUserData(this);
 
         CircleShape shape = new CircleShape();
-        shape.setRadius(16f);
+        shape.setRadius(scale.pixelsToMeters(16f));
 
         // Create a fixture definition to apply our shape to
         FixtureDef fixtureDef = new FixtureDef();
@@ -72,11 +78,11 @@ public class Ball {
     }
 
     public float getX() {
-        return body.getPosition().x - (sprite.getWidth() * 0.5f);
+        return scale.metersToPixels(body.getPosition().x) - (sprite.getWidth() * 0.5f);
     }
 
     public float getY() {
-        return body.getPosition().y - (sprite.getHeight() * 0.5f);
+        return scale.metersToPixels(body.getPosition().y) - (sprite.getHeight() * 0.5f);
     }
 
     public void dispose() {

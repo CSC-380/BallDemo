@@ -41,6 +41,8 @@ public class GameScreen implements Screen {
     float tiltX;
     float tiltY;
 
+    ScaleConverter scale = new ScaleConverter(1f/64f);
+
     Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     final DecimalFormat decimalFormatter = new DecimalFormat("######.##");
 
@@ -71,23 +73,23 @@ public class GameScreen implements Screen {
             if (obj.getName().equals("wall")) {
                 if (obj instanceof PolygonMapObject) {
                     Gdx.app.log("populating map", "adding wall");
-                    new Wall((PolygonMapObject)obj, world);
+                    new Wall((PolygonMapObject)obj, world, scale);
                 }
                 else if (obj instanceof RectangleMapObject) {
                     Gdx.app.log("populating map", "adding wall");
-                    new Wall((RectangleMapObject)obj, world);
+                    new Wall((RectangleMapObject)obj, world, scale);
                 }
             }
             else if (obj.getName().equals("bumper")) {
                 if (obj instanceof PolygonMapObject) {
                     Gdx.app.log("populating map", "adding bumper");
-                    new PushBumper((PolygonMapObject)obj, world);
+                    new PushBumper((PolygonMapObject)obj, world, scale);
                 }
             }
             else if (obj.getName().equals("ball spawn point")) {
                 if (obj instanceof EllipseMapObject) {
                     Gdx.app.log("populating map", "adding ball");
-                    ball = new Ball((EllipseMapObject)obj, world);
+                    ball = new Ball((EllipseMapObject)obj, world, scale);
                 }
             }
         }
@@ -140,16 +142,16 @@ public class GameScreen implements Screen {
                 public boolean keyDown(int keycode) {
                     switch (keycode) {
                     case Keys.LEFT:
-                        tiltX -= 10f;
+                        tiltX -= 0.001f;
                         break;
                     case Keys.RIGHT:
-                        tiltX += 10f;
+                        tiltX += 0.001f;
                         break;
                     case Keys.UP:
-                        tiltY += 10f;
+                        tiltY += 0.001f;
                         break;
                     case Keys.DOWN:
-                        tiltY -= 10f;
+                        tiltY -= 0.001f;
                         break;
                     case Keys.CENTER:
                         tiltX = 0f;
@@ -175,12 +177,15 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0, 0, 0.2f, 1);
         Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
-        camera.position.set(ball.getBody().getPosition().x, ball.getBody().getPosition().y, camera.position.z);
+        camera.position.set(
+                scale.metersToPixels(ball.getBody().getPosition().x),
+                scale.metersToPixels(ball.getBody().getPosition().y),
+                camera.position.z);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
         if (game.debugView) {
-            debugRenderer.render(world, camera.combined);
+            debugRenderer.render(world, camera.combined.scl(1f / scale.getScale()));
         }
         else {
             mapRenderer.setView(camera);
@@ -211,8 +216,8 @@ public class GameScreen implements Screen {
         if (!game.useDpad) {
             if (Gdx.input.isPeripheralAvailable(Peripheral.Accelerometer)) {
                 // accelerometer is reversed from screen coordinates, we are in landscape mode
-                tiltX = Gdx.input.getAccelerometerY() * 10;
-                tiltY = Gdx.input.getAccelerometerX() * -10;
+                tiltX = Gdx.input.getAccelerometerY() * 0.001f;
+                tiltY = Gdx.input.getAccelerometerX() * -0.001f;
             }
         }
 

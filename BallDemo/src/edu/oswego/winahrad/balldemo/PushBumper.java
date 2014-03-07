@@ -13,8 +13,11 @@ import com.badlogic.gdx.physics.box2d.World;
 
 public class PushBumper {
     Body body;
+    ScaleConverter scale;
 
-    public PushBumper(PolygonMapObject mapObject, World world) {
+    public PushBumper(PolygonMapObject mapObject, World world, ScaleConverter scale) {
+        this.scale = scale;
+
         Polygon polygon = mapObject.getPolygon();
 
         BodyDef bdef = new BodyDef();

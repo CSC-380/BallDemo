@@ -15,9 +15,13 @@ import com.badlogic.gdx.physics.box2d.World;
 
 public class Wall {
     Body body;
+    ScaleConverter scale;
 
-    public Wall(PolygonMapObject mapObject, World world) {
+    public Wall(PolygonMapObject mapObject, World world, ScaleConverter scale) {
+        this.scale = scale;
+
         Polygon polygon = mapObject.getPolygon();
+        polygon.scale(scale.getScale());
 
         BodyDef bdef = new BodyDef();
         bdef.type = BodyType.StaticBody;
@@ -41,7 +45,9 @@ public class Wall {
         body.setUserData(this);
     }
 
-    public Wall(RectangleMapObject mapObject, World world) {
+    public Wall(RectangleMapObject mapObject, World world, ScaleConverter scale) {
+        this.scale = scale;
+
         Rectangle rectangle = mapObject.getRectangle();
 
         Gdx.app.log("rectangle wall", rectangle.x + " " + rectangle.y);
@@ -53,10 +59,12 @@ public class Wall {
         body = world.createBody(bdef);
 
         PolygonShape shape = new PolygonShape();
-        Vector2 center = new Vector2((rectangle.x + rectangle.width * 0.5f),
-                (rectangle.y + rectangle.height * 0.5f ));
-        shape.setAsBox(rectangle.width * 0.5f,
-                rectangle.height * 0.5f,
+        Vector2 center = new Vector2(
+                scale.pixelsToMeters(rectangle.x + (rectangle.width * 0.5f)),
+                scale.pixelsToMeters(rectangle.y + (rectangle.height * 0.5f)));
+        shape.setAsBox(
+                scale.pixelsToMeters(rectangle.width * 0.5f),
+                scale.pixelsToMeters(rectangle.height * 0.5f),
                 center,
                 0.0f);
 
